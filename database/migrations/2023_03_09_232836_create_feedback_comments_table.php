@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('feedback_comments', function (Blueprint $table) {
-            $table->bigIncrements('id')->primary();
+            $table->bigIncrements('id');
             $table->longText('text');
             $table->foreignId('user_id')->reference('id')->on('users');
             $table->foreignId('feedback_request_id')->reference('id')->on('feedback_requests');
