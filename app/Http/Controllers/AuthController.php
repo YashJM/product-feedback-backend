@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -16,19 +17,38 @@ class AuthController extends Controller
             'password' => 'required|string|confirmed',
         ]);
 
-        $user = User::create([
+        User::create([
             'name' => $fields['name'],
             'email' => $fields['email'],
             'password' => Hash::make($fields['password']),
         ]);
 
-        $token = $user->createToken('app-token')->plainTextToken;
+        return response()->json([
+            'message' => 'User created',
+        ], 201);
+    }
 
-        $response = [
-            'user' => $user,
-            'token' => $token,
-        ];
+    public function login(Request $request)
+    {
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
 
-        return response($response, 201);
+        if (Auth::attempt($credentials)) {
+            return response()->json(['message' => 'Logged in successfully']);
+        }
+
+        return response()->json(['message' => 'Invalid credentials'], 401);
+    }
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return response()->json([
+            'message' => 'User logged out successfully.'
+        ]);
     }
 }
